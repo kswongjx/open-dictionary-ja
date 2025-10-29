@@ -8,8 +8,15 @@ import sys
 from pathlib import Path
 from typing import Iterator, Sequence
 
-import psycopg
-from psycopg import sql
+# Optional dependency - only import when database features are actually used
+try:
+    import psycopg
+    from psycopg import sql
+    HAS_PSYCOPG = True
+except ImportError:
+    HAS_PSYCOPG = False
+    psycopg = None
+    sql = None
 
 from .progress import StreamingProgress
 
@@ -19,6 +26,14 @@ UTF8_BOM = b"\xef\xbb\xbf"
 
 class JsonlProcessingError(Exception):
     """Raised when the JSONL input contains invalid JSON content."""
+
+
+def _check_psycopg():
+    """Raise ImportError if psycopg is not installed."""
+    if not HAS_PSYCOPG:
+        raise ImportError(
+            "psycopg is not installed. Install it with: pip install psycopg"
+        )
 
 
 def iter_json_lines(file_path: Path) -> Iterator[tuple[str, int]]:
@@ -101,6 +116,7 @@ def partition_dictionary_by_language(
     languages: Sequence[str] | None = None,
 ) -> list[str]:
     """Split rows in ``source_table`` into per-language tables based on ``lang_field``."""
+    _check_psycopg()
 
     created_tables: list[str] = []
     table_identifier = _identifier_from_dotted(source_table)
@@ -223,6 +239,7 @@ def copy_jsonl_to_postgres(
 
     Returns the number of rows copied.
     """
+    _check_psycopg()
 
     table_identifier = _identifier_from_dotted(table_name)
     if not column_name.strip():

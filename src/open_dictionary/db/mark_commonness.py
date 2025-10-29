@@ -6,9 +6,21 @@ from decimal import Decimal
 from functools import lru_cache
 from typing import Any, Optional, Sequence, Tuple
 
-from psycopg import sql
-from psycopg.cursor import Cursor
-from wordfreq import zipf_frequency
+# Optional dependency - only import when database features are actually used
+try:
+    from psycopg import sql
+    from psycopg.cursor import Cursor
+    HAS_PSYCOPG = True
+except ImportError:
+    HAS_PSYCOPG = False
+    sql = None
+    Cursor = None
+
+try:
+    from wordfreq import zipf_frequency
+    HAS_WORDFREQ = True
+except ImportError:
+    HAS_WORDFREQ = False
 
 from open_dictionary.db.access import DatabaseAccess
 

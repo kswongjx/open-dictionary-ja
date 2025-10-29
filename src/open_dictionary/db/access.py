@@ -1,18 +1,42 @@
-from typing import Iterator, Any, Sequence, Tuple, Union
+from typing import Iterator, Any, Sequence, Tuple, Union, TYPE_CHECKING
 import uuid
-import psycopg
-from psycopg.rows import dict_row
-from psycopg import sql
-from psycopg.sql import Composable
+
+# Optional dependency - only import when database features are actually used
+try:
+    import psycopg
+    from psycopg.rows import dict_row
+    from psycopg import sql
+    from psycopg.sql import Composable
+    HAS_PSYCOPG = True
+except ImportError:
+    HAS_PSYCOPG = False
+    psycopg = None
+    dict_row = None
+    sql = None
+    # Use string for type hints when psycopg is not available
+    Composable = "Composable"
 
 from open_dictionary.utils.env_loader import get_env
 
-ColumnSpec = Union[str, Tuple[str, Composable]]
+# Use conditional type definition
+if TYPE_CHECKING:
+    from psycopg.sql import Composable
+    ColumnSpec = Union[str, Tuple[str, Composable]]
+else:
+    ColumnSpec = Union[str, Tuple[str, Any]]
+
+# Helper to raise error if psycopg is not available
+def _check_psycopg():
+    if not HAS_PSYCOPG:
+        raise ImportError(
+            "psycopg is not installed. Install it with: pip install psycopg"
+        )
 
 class DatabaseAccess:
     """Database access layer for dictionary tables."""
 
     def __init__(self, connection_string: str | None = None):
+        _check_psycopg()
         resolved = connection_string or get_env("DATABASE_URL")
         if not resolved:
             raise RuntimeError("Database connection string is not configured")
@@ -20,6 +44,7 @@ class DatabaseAccess:
 
     def _get_connection(self):
         """Get database connection."""
+        _check_psycopg()
         return psycopg.connect(self.connection_string) # type: ignore
 
     def get_connection(self):
@@ -32,7 +57,7 @@ class DatabaseAccess:
         batch_size: int = 20,
         *,
         columns: Sequence[ColumnSpec] | None = None,
-        where: Composable | None = None,
+        where: Any | None = None,
         order_by: Sequence[str] | None = None,
     ) -> Iterator[dict[str, Any]]:
         """Iterate over all rows in a table using server-side cursor for memory efficiency.

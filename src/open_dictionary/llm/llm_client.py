@@ -37,10 +37,10 @@ def get_chat_response(instructions: str, input: str) -> str:
     api_method = get_env('LLM_METHOD', default='responses').lower()
 
     # Map method names to client attributes
-    # 'chat' maps to 'chat.completions', others use themselves
+    # 'chat' uses client.chat.completions, 'responses' uses client.responses
     method_map = {
-        'responses': 'responses',
-        'chat': 'chat.completions'
+        'responses': ('responses', None),
+        'chat': ('chat', 'completions')
     }
 
     if api_method not in method_map:
@@ -49,10 +49,15 @@ def get_chat_response(instructions: str, input: str) -> str:
             "Must be either 'responses' or 'chat'."
         )
 
-    client_attr = method_map[api_method]
+    attr_name, sub_attr = method_map[api_method]
 
-    # Use dynamic attribute access: client.{}.create()
-    api_endpoint = getattr(client, client_attr)
+    # Use dynamic attribute access with nested attributes if needed
+    if sub_attr:
+        # For 'chat.completions': getattr(getattr(client, 'chat'), 'completions')
+        api_endpoint = getattr(getattr(client, attr_name), sub_attr)
+    else:
+        # For 'responses': getattr(client, 'responses')
+        api_endpoint = getattr(client, attr_name)
 
     # Prepare parameters based on API method
     if api_method == 'responses':

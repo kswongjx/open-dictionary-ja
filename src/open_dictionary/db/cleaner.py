@@ -3,8 +3,15 @@ from __future__ import annotations
 import time
 from typing import Any, Sequence
 
-from psycopg import sql
-from psycopg.cursor import Cursor
+# Optional dependency - only import when database features are actually used
+try:
+    from psycopg import sql
+    from psycopg.cursor import Cursor
+    HAS_PSYCOPG = True
+except ImportError:
+    HAS_PSYCOPG = False
+    sql = None
+    Cursor = None
 
 # 假设这个模块存在并且可以正确配置数据库连接
 # 注意：您需要确保 open_dictionary.db.access 模块在您的环境中可用

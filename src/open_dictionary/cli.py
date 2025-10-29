@@ -7,8 +7,14 @@ import os
 import sys
 from pathlib import Path
 
-import psycopg
 from dotenv import load_dotenv
+
+# Optional dependency - only import if database features are used
+try:
+    import psycopg
+    HAS_PSYCOPG = True
+except ImportError:
+    HAS_PSYCOPG = False
 
 from .db import cleaner as db_cleaner
 from .db import mark_commonness as db_commonness
@@ -107,6 +113,9 @@ def _cmd_load(args: argparse.Namespace) -> int:
     except RuntimeError as exc:
         args._parser.error(str(exc))
 
+    if not HAS_PSYCOPG:
+        args._parser.error("psycopg is not installed. Install it with: pip install psycopg")
+
     try:
         rows_copied = copy_jsonl_to_postgres(
             jsonl_path=args.input,
@@ -129,6 +138,9 @@ def _cmd_partition(args: argparse.Namespace) -> int:
         conninfo = _get_conninfo(args)
     except RuntimeError as exc:
         args._parser.error(str(exc))
+
+    if not HAS_PSYCOPG:
+        args._parser.error("psycopg is not installed. Install it with: pip install psycopg")
 
     try:
         created = partition_dictionary_by_language(
@@ -157,6 +169,9 @@ def _cmd_pipeline(args: argparse.Namespace) -> int:
         conninfo = _get_conninfo(args)
     except RuntimeError as exc:
         args._parser.error(str(exc))
+
+    if not HAS_PSYCOPG:
+        args._parser.error("psycopg is not installed. Install it with: pip install psycopg")
 
     try:
         run_pipeline(
@@ -193,6 +208,9 @@ def _cmd_filter(args: argparse.Namespace) -> int:
     except RuntimeError as exc:
         args._parser.error(str(exc))
 
+    if not HAS_PSYCOPG:
+        args._parser.error("psycopg is not installed. Install it with: pip install psycopg")
+
     try:
         created = filter_languages(
             conninfo,  # type: ignore[arg-type]
@@ -224,6 +242,9 @@ def _cmd_db_clean(args: argparse.Namespace) -> int:
     except RuntimeError as exc:
         args._parser.error(str(exc))
 
+    if not HAS_PSYCOPG:
+        args._parser.error("psycopg is not installed. Install it with: pip install psycopg")
+
     db_cleaner.clean_dictionary_data(
         table_name=args.table,
         fetch_batch_size=args.fetch_batch_size,
@@ -239,6 +260,9 @@ def _cmd_db_commonness(args: argparse.Namespace) -> int:
         _ = _get_conninfo(args)
     except RuntimeError as exc:
         args._parser.error(str(exc))
+
+    if not HAS_PSYCOPG:
+        args._parser.error("psycopg is not installed. Install it with: pip install psycopg")
 
     db_commonness.enrich_common_score(
         table_name=args.table,
