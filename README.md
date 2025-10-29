@@ -1,6 +1,6 @@
-# Open English Dictionary
+# Open Japanese Dictionary
 
-Utilities for downloading and loading the Wiktionary dataset into PostgreSQL.
+Utilities for downloading and loading the Wiktionary dataset into PostgreSQL for Japanese-Chinese dictionary creation.
 
 ## Prerequisites
 
@@ -55,7 +55,7 @@ uv run open-dictionary partition \
 Materialize a smaller set of languages into dedicated tables with a custom prefix:
 
 ```bash
-uv run open-dictionary filter en zh \
+uv run open-dictionary filter ja zh \
   --table dictionary_all \
   --column data \
   --table-prefix dictionary_filtered
@@ -70,13 +70,22 @@ uv run open-dictionary filter all --table dictionary_all --column data
 Remove low-quality rows (zero common score, numeric tokens, legacy tags) directly in PostgreSQL:
 
 ```bash
-uv run open-dictionary db-clean --table dictionary_filtered_en
+uv run open-dictionary db-clean --table dictionary_filtered_ja
 ```
 
 Populate the `common_score` column with word frequency data (re-run with `--recompute-existing` to refresh scores):
 
 ```bash
-uv run open-dictionary db-commonness --table dictionary_filtered_en
+uv run open-dictionary db-commonness --table dictionary_filtered_ja
+```
+
+Generate Japanese-Chinese definitions using LLM in parallel:
+
+```bash
+uv run open-dictionary define \
+  --table dictionary_filtered_ja \
+  --sqlite-path data/japanese-chinese-dictionary.sqlite \
+  --workers 50
 ```
 
 Each command streams data in chunks to handle the 10M+ line dataset efficiently.

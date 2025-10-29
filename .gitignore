@@ -11,3 +11,8 @@ wheels/
 .env
 words.txt
 .DS_Store
+
+# AI coding files
+CLAUDE.md
+AGENTS.md
+.spec-workflow/

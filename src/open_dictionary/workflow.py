@@ -101,7 +101,7 @@ def process_single_word(word_data: dict[str, Any]) -> tuple[str, dict[str, Any]]
 
 
 def run_parallel_definitions(
-    table_name: str = "dictionary_en",
+    table_name: str = "dictionary_ja",
     batch_size: int = 50,
     max_workers: int = 50,
     sqlite_path: str = "data/dictionary.sqlite",
@@ -228,8 +228,8 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--table",
-        default="dictionary_en",
-        help="PostgreSQL table to read dictionary entries from (default: dictionary_en).",
+        default="dictionary_ja",
+        help="PostgreSQL table to read dictionary entries from (default: dictionary_ja).",
     )
     parser.add_argument(
         "--batch-size",

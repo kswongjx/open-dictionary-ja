@@ -23,7 +23,7 @@ from .wikitionary.transform import (
 )
 
 
-DEFAULT_DICTIONARY_TABLE = "dictionary_en"
+DEFAULT_DICTIONARY_TABLE = "dictionary_ja"
 
 
 COMMAND_NAMES = {
