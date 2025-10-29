@@ -182,15 +182,20 @@ def print_summary(definitions: List[Definition]):
     print("MVP Test Summary")
     print("=" * 60)
     print(f"Total entries processed: {len(definitions)}")
-    
+
     if definitions:
         print("\nGenerated entries:")
         for definition in definitions:
-            print(f"\n  - {definition.word} ({definition.pos})")
-            print(f"    Concise definition: {definition.concise_definition}")
+            # Use safe printing to avoid encoding issues
+            try:
+                print(f"\n  - {definition.word} ({definition.pos})")
+                print(f"    Concise definition: {definition.concise_definition}")
+            except UnicodeEncodeError:
+                print(f"\n  - [Word with Unicode characters] ({definition.pos})")
+                print(f"    Concise definition: [Chinese characters - check output files]")
             print(f"    Detailed definitions: {len(definition.detailed_definitions)}")
             print(f"    Derived words: {len(definition.derived)}")
-    
+
     print("\n" + "=" * 60)
 
 
