@@ -14,3 +14,4 @@ words.txt
 
 # AI coding files
 .spec-workflow/
+*.sh
